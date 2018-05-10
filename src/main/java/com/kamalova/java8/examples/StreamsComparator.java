@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -21,6 +22,7 @@ public class StreamsComparator {
     }
 
     private static void testThree() {
+
         List<Dish> menu = new ArrayList<>();
         menu.add(new Dish("pork", 200, Boolean.FALSE, "meat"));
         menu.add(new Dish("chicken", 100, Boolean.FALSE, "meat"));
