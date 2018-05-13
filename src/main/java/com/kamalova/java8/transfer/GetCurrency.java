@@ -56,6 +56,5 @@ public class GetCurrency {
                 .map(Currency::getCode);
         System.out.println(currencyCode);
 
-
     }
 }
