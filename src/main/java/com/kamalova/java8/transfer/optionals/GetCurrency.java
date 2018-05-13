@@ -18,12 +18,12 @@ public class GetCurrency {
 //                        }
 //        );
 
-        currencyCode = Optional.ofNullable(transfer)
-                .map(Transfer::getPerson)
-                .map(Person::getCard)
-                .map(Card::getCurrency)
-                .map(Currency::getCode);
-        System.out.println(currencyCode);
+//        currencyCode = Optional.ofNullable(transfer)
+//                .map(Transfer::getPerson)
+//                .map(Person::getCard)
+//                .map(Card::getCurrency)
+//                .map(Currency::getCode);
+//        System.out.println(currencyCode);
 
         Optional<Optional<Person>> person1 = Optional.ofNullable(transfer)
                 .map(Transfer::getPerson);
