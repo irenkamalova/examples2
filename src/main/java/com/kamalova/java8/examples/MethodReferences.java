@@ -1,8 +1,7 @@
 package com.kamalova.java8.examples;
 
-import java.nio.file.DirectoryStream;
-import java.util.ArrayList;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class MethodReferences {
 

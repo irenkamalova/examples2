@@ -1,6 +1,5 @@
 package com.kamalova.java8.dealingnull;
 
-import com.sun.istack.internal.NotNull;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -20,13 +19,8 @@ public class Person {
 //    @NotNull
     private String thirdName;
 
-    public Person(@NonNull String firstName, @NonNull String secondName, @NonNull String thirdName) {
-        this.firstName = firstName;
-        this.secondName = secondName;
-        this.thirdName = thirdName;
-
-        this.car = Optional.empty();
-    }
+    @Setter
+    private Optional<Brain> brain;
 
 //        public Person(String firstName, String secondName, String thirdName) {
 //        if (firstName == null)
@@ -53,5 +47,14 @@ public class Person {
 
     @Setter
     private Optional<Car> car;
+
+    public Person(@NonNull String firstName, @NonNull String secondName, @NonNull String thirdName) {
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.thirdName = thirdName;
+
+        this.car = Optional.empty();
+        this.brain = Optional.empty();
+    }
 }
 

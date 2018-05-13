@@ -32,12 +32,9 @@ public class GetCurrency {
         Optional<Person> p = person1.get();
 
         currencyCode = Optional.ofNullable(transfer)
-                .map(Transfer::getPerson)
-                .get()
-                .map(Person::getCard)
-                .get()
-                .map(Card::getCurrency)
-                .get()
+                .flatMap(Transfer::getPerson)
+                .flatMap(Person::getCard)
+                .flatMap(Card::getCurrency)
                 .map(Currency::getCode);
 
 

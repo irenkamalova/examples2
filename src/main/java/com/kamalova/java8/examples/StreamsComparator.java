@@ -3,11 +3,9 @@ package com.kamalova.java8.examples;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -28,13 +26,26 @@ public class StreamsComparator {
         menu.add(new Dish("chicken", 100, Boolean.FALSE, "meat"));
         menu.add(new Dish("salmon", 100, Boolean.FALSE, "fish"));
         menu.add(new Dish("salad", 50, Boolean.TRUE, "other"));
-        List<String> dishNames = menu.parallelStream().filter(d -> {
+
+//        (v -> v.getVegan()).negate();
+        List<String> dishNames1 =
+                menu.stream()
+//                        .filter((v -> v.getVegan()).negate())
+//                        .peek(System.out::println)
+                        .filter(d -> d.getCalories() > 50)
+                        .limit(3)
+//                        .collect(Collectors.gr)
+                        .map(Dish::getName)
+                        .distinct()
+                        .collect(Collectors.toList());
+
+        List<String> dishNames = menu.stream().filter(d -> {
             System.out.println("filter: " + d);
-            return !d.getVegan();
+            return d.getVegan();
         }).map(d -> {
             System.out.println("mapped: " + d);
             return d.getName();
-        }).collect(Collectors.toList());
+        }).limit(1).collect(Collectors.toList());
 
         dishNames.forEach(System.out::println);
         /*

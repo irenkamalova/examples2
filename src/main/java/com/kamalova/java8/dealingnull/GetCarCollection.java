@@ -1,11 +1,8 @@
 package com.kamalova.java8.dealingnull;
 
-import com.sun.corba.se.impl.orbutil.ObjectUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public class GetCarCollection {
@@ -21,6 +18,17 @@ public class GetCarCollection {
         p.setCar(Optional.of(new Car("m")));
         people.add(p);
 
+        Person cleverPerson = new Person("7", "7", "7");
+        cleverPerson.setBrain(Optional.of(new Brain()));
+        people.add(cleverPerson);
+
+        List<Person> cleverPeople = people.stream()
+                .filter(person -> person.getBrain().isPresent())
+                .peek(System.out::println)
+                .collect(Collectors.toList());
+
+
+
         List<Person> collect = people.stream().filter(person -> person.getCar().isPresent()).collect(Collectors.toList());
         collect.forEach(System.out::println);
         Car car = new Car("m");
@@ -33,10 +41,13 @@ public class GetCarCollection {
         String label = carLabel.orElse("Unknown");
         System.out.println(label);
 
-        carLabel.orElseGet(() -> {
-            car.setLabel("Unknown");
-            return "Unknown";
-        });
+//        carLabel.orElseGet();
+
+        String s = carLabel.get();
+
+        Optional<Car> car1 = Optional.of(car);
+
+        carLabel.orElseThrow(NullPointerException::new);
 
         String result = carLabel.orElseThrow(IllegalArgumentException::new);
 
@@ -47,7 +58,7 @@ public class GetCarCollection {
 
         String five = "5";
 //        Integer integer = OptionalUtility.
-        OptionalInt optionalInt = new;
+//        OptionalInt optionalInt = new;
 
     }
 
