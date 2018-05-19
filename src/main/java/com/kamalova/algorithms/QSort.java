@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.IntConsumer;
 
 public class QSort {
-    private static int[] a;
+    static int[] a;
 
     private static IntConsumer printArray = (i) -> System.out.print(i + " ");
 
@@ -14,8 +14,7 @@ public class QSort {
         Arrays.stream(a).forEach(printArray);
     }
 
-
-    private static void sortByMedian(int firstIndex, int lastIndex) {
+    static void sortByMedian(int firstIndex, int lastIndex) {
 
         arrayToPrint(firstIndex, lastIndex);
 
@@ -28,23 +27,27 @@ public class QSort {
             return;
         }
         int medianIndex = firstIndex + (lastIndex - firstIndex) / 2;
+//        int medianIndex = firstIndex;
         int median = a[medianIndex];
         System.out.println("median=" + median);
 
         int i = firstIndex;
         int j = lastIndex;
         while (i < j) {
+            while (a[i] <= median && i < j)
+                i++;
+            while (a[j] > median && i < j)
+                j--;
+
             if ((a[i] > median) && (a[j] <= median)) {
                 swapByIndex(i, j);
-                if (i < j)
-                    i++;
-                if (i < j)
-                    j--;
+//                if (i < j)
+//                    i++;
+//                if (i < j)
+//                    j--;
             }
-            if (a[i] <= median && i < j)
-                i++;
-            if (a[j] > median && i < j)
-                j--;
+
+
         }
 
         arrayToPrint(firstIndex, lastIndex);
@@ -53,15 +56,13 @@ public class QSort {
             swapByIndex(medianIndex, j);
         }
 
-        if (i == j) {
-            if (a[i] > median) {
-                i--;
-            } else if (a[j] <= median && j < lastIndex) {
-                j++;
-            } else {
-                i--;
-            }
+
+        if (a[j] <= median && j < lastIndex) {
+            j++;
+        } else {
+            i--;
         }
+
         
         sortByMedian(firstIndex, i);
         sortByMedian(j, lastIndex);
