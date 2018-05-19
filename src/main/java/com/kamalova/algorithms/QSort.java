@@ -21,11 +21,6 @@ public class QSort {
         if (lastIndex - firstIndex == 0)
             return;
 
-        if (lastIndex - firstIndex == 1) {
-            if (a[firstIndex] > a[lastIndex])
-                swapByIndex(firstIndex, lastIndex);
-            return;
-        }
         int medianIndex = firstIndex + (lastIndex - firstIndex) / 2;
 //        int medianIndex = firstIndex;
         int median = a[medianIndex];
@@ -38,15 +33,8 @@ public class QSort {
                 i++;
             while (a[j] > median && i < j)
                 j--;
-
-            if ((a[i] > median) && (a[j] <= median)) {
+            if ((a[i] > median) && (a[j] <= median))
                 swapByIndex(i, j);
-//                if (i < j)
-//                    i++;
-//                if (i < j)
-//                    j--;
-            }
-
 
         }
 
@@ -55,17 +43,9 @@ public class QSort {
         if (j == lastIndex && a[j] < median) {
             swapByIndex(medianIndex, j);
         }
-
-
-        if (a[j] <= median && j < lastIndex) {
-            j++;
-        } else {
-            i--;
-        }
-
         
-        sortByMedian(firstIndex, i);
-        sortByMedian(j, lastIndex);
+        sortByMedian(firstIndex, i - 1);
+        sortByMedian(i, lastIndex);
     }
 
     private static void swapByIndex(int i, int j) {
@@ -79,5 +59,36 @@ public class QSort {
             System.out.print(a[i] + " ");
         }
         System.out.println();
+    }
+
+    static void sortByMedian2(int firstIndex, int lastIndex) {
+        if (lastIndex - firstIndex == 0)
+            return;
+
+        int medianIndex = firstIndex + (lastIndex - firstIndex) / 2;
+//        int medianIndex = firstIndex;
+        int median = a[medianIndex];
+
+        int i = firstIndex;
+        int j = lastIndex;
+
+        while (i <= j) {
+            while (a[i] < median) {
+                i++;
+            }
+            while (a[j] > median) {
+                j--;
+            }
+
+            if (i <= j) {
+                swapByIndex(i, j);
+                i++;
+                j--;
+            }
+        }
+
+        sortByMedian2(firstIndex, i - 1);
+        sortByMedian2(i, lastIndex);
+
     }
 }

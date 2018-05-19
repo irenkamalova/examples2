@@ -35,6 +35,17 @@ public class QSortTest {
         int[] a = new int[]{6, 1, 7, 9, 9, 9, 3, -20, 5, 5, 5, 4, 0, -1, 11};
         testA(a);
     }
+    @Test
+    public void test5() {
+        int[] a = new int[]{6, 6, 6, 6};
+        testA(a);
+    }
+
+    @Test
+    public void test6() {
+        int[] a = new int[]{6, 6, 6, 6, 6};
+        testA(a);
+    }
 
     private void testA(int[] a) {
         QSort.a = a;
