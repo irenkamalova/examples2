@@ -16,6 +16,11 @@ public class MergeSort {
     }
 
     static void mergeSort(int[] a, int firstIndex, int lastIndex) {
+        int[] b = new int[a.length];
+        mergeSorting(a, b, firstIndex, lastIndex);
+    }
+
+    private static void mergeSorting(int[] a, int b[], int firstIndex, int lastIndex) {
         if (lastIndex - firstIndex == 0) {
             return;
         }
@@ -31,21 +36,23 @@ public class MergeSort {
         ArrayUtils.arrayToPrint(a, firstIndex, m);
         ArrayUtils.arrayToPrint(a, m + 1, lastIndex);
 
-        mergeSort(a, firstIndex, m);
-        mergeSort(a, m + 1, lastIndex);
+        mergeSorting(a, b, firstIndex, m);
+        mergeSorting(a, b, m + 1, lastIndex);
 
-        merge(a, firstIndex, m, m + 1, lastIndex);
+        merge(a, b, firstIndex, m, m + 1, lastIndex);
 
     }
 
-    private static void merge(int[] a, int firstIndexOfFirstArray,
+    private static void merge(int[] a, int[] b, int firstIndexOfFirstArray,
                               int lastIndexOfFirstArray,
                               int firstIndexOfSecondArray,
                               int lastOfIndexOfSecondArray) {
 
-        int[] b = new int[a.length];
-        System.arraycopy(a, 0, b, 0, a.length);
-        // - хотя тут неоптимально: копируем весь массив, а хотим лишь кусочек
+        // копируем тот кусочек, который будем мержить:
+        // частая ошибка: < пишу там, где надо <=
+        for (int i = firstIndexOfFirstArray; i <= lastOfIndexOfSecondArray; i++) {
+            b[i] = a[i];
+        }
 
         int i = firstIndexOfFirstArray;
         int j = firstIndexOfSecondArray;
@@ -74,13 +81,5 @@ public class MergeSort {
         ArrayUtils.arrayToPrint(a, firstIndexOfFirstArray, lastOfIndexOfSecondArray);
 
     }
-
-    private static void replace(int[] a, int[] b,
-                                int firstOfFirst, int lastOfSecond) {
-        for (int i = 0, j = firstOfFirst; i < b.length; i++, j++) {
-            a[j] = b[i];
-        }
-    }
-
 
 }
