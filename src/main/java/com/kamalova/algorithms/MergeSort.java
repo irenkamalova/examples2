@@ -24,12 +24,6 @@ public class MergeSort {
         if (lastIndex - firstIndex == 0) {
             return;
         }
-        if (lastIndex - firstIndex == 1) {
-            if (a[firstIndex] > a[lastIndex])
-                ArrayUtils.swap(a, firstIndex, lastIndex);
-            return;
-        }
-
         int m = (firstIndex + lastIndex) / 2;
 
         System.out.println();
