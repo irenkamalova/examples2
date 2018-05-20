@@ -16,8 +16,6 @@ public class MergeSort {
     }
 
     static void mergeSort(int[] a, int firstIndex, int lastIndex) {
-        int[] b = new int[a.length];
-
         if (lastIndex - firstIndex == 0) {
             return;
         }
@@ -27,24 +25,16 @@ public class MergeSort {
             return;
         }
 
-        int m = firstIndex + (lastIndex - firstIndex) / 2;
-        int bound1;
-        int bound2;
-        if ((lastIndex - firstIndex) % 2 == 1) {
-            bound1 = m;
-            bound2 = m + 1;
-        } else {
-            bound1 = m - 1;
-            bound2 = m;
-        }
+        int m = (firstIndex + lastIndex) / 2;
+
         System.out.println();
-        ArrayUtils.arrayToPrint(a, firstIndex, bound1);
-        ArrayUtils.arrayToPrint(a, bound2, lastIndex);
+        ArrayUtils.arrayToPrint(a, firstIndex, m);
+        ArrayUtils.arrayToPrint(a, m + 1, lastIndex);
 
-        mergeSort(a, firstIndex, bound1);
-        mergeSort(a, bound2, lastIndex);
+        mergeSort(a, firstIndex, m);
+        mergeSort(a, m + 1, lastIndex);
 
-        merge(a, firstIndex, bound1, bound2, lastIndex);
+        merge(a, firstIndex, m, m + 1, lastIndex);
 
     }
 
@@ -82,9 +72,6 @@ public class MergeSort {
 
         System.out.println("Result is:");
         ArrayUtils.arrayToPrint(a, firstIndexOfFirstArray, lastOfIndexOfSecondArray);
-
-//        replace(a, b, firstOfFirst, lastOfSecond);
-
 
     }
 
