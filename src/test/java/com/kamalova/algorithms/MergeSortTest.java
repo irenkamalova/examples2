@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
-
 public class MergeSortTest {
     @Test
     public void test1() {
@@ -48,7 +46,7 @@ public class MergeSortTest {
     private void testA(int[] a) {
         int[] testedArray = new int[a.length];
         System.arraycopy(a, 0, testedArray, 0, a.length);
-        MergeSort.mergeSort(testedArray,0, a.length - 1);
+        MergeSort.mergeSort(testedArray);
         a = Arrays.stream(a).sorted().toArray();
         Assert.assertArrayEquals(a, testedArray);
     }

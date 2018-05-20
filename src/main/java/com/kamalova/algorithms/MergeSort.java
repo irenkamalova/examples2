@@ -1,7 +1,5 @@
 package com.kamalova.algorithms;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
 import java.util.Arrays;
 
 public class MergeSort {
@@ -11,13 +9,13 @@ public class MergeSort {
         Arrays.stream(a).forEach(ArrayUtils.printArray);
         System.out.println();
         System.out.println();
-        mergeSort(a, 0, a.length - 1);
+        mergeSort(a);
         Arrays.stream(a).forEach(ArrayUtils.printArray);
     }
 
-    static void mergeSort(int[] a, int firstIndex, int lastIndex) {
+    static void mergeSort(int[] a) {
         int[] b = new int[a.length];
-        mergeSorting(a, b, firstIndex, lastIndex);
+        mergeSorting(a, b, 0, a.length - 1);
     }
 
     private static void mergeSorting(int[] a, int b[], int firstIndex, int lastIndex) {
