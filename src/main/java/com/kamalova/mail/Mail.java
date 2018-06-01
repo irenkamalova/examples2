@@ -13,22 +13,29 @@ import java.util.Properties;
 
 public class Mail {
     public static void main(String[] args) {
-        String from = "your@gmail.com"; // sender email
-        String to = "irisha_mur@mail.ru"; // receiver email
+        String from = "from@gmail.com"; // sender email
+        String to = "to@mail.ru"; // receiver email
         String host = "smtp.gmail.com"; // mail server host
 
         // final ?
         // app need permission to use the System Properties object
         // (alternatively, the application can use its own Properties object)
         Properties properties = System.getProperties();
-        properties.setProperty("mail.transport.protocol", "smtp");
+
+        properties.setProperty("mail.smtp.socketFactory.port", "465");
+        properties.setProperty("mail.smtp.socketFactory.class",
+                "javax.net.ssl.SSLSocketFactory");
+        properties.setProperty("mail.smtp.port", "465");
+        properties.setProperty("mail.smtp.ssl.enable", "true");
         // javax.mail.MessagingException: Could not connect to SMTP host: smtp.gmail.com, port:
         // smtp - port 25
         // smtps - port 465
+
         properties.setProperty("mail.smtp.host", host);
         properties.setProperty("mail.smtp.user", from);
         properties.setProperty("mail.smtp.auth", "true");
         properties.setProperty("mail.smtp.starttls.enable", "true");
+        //properties.setProperty("mail.smtp.port", "587");
 
 //        try {
 //            properties.load(Mail.class.getClassLoader().getResourceAsStream("mail.properties"));
@@ -36,7 +43,12 @@ public class Mail {
 //            e.printStackTrace();
 //        }
 
-        Session session = Session.getInstance(properties); // default session
+        Session session = Session.getInstance(properties,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication("your@gmail.com", "pswd");
+                    }
+                }); // default session
         // поможет отловить ошибки и увидеть, что происходит:
         session.setDebug(true);
 
@@ -50,10 +62,11 @@ public class Mail {
                     "but you need" + "couple of more JAR files e.g. smtp.jar and activation.jar");
             // Send message
 
-            Transport transport = session.getTransport();
-            transport.connect(from, "");
-            transport.sendMessage(message, message.getAllRecipients());
-            transport.close();
+            Transport.send(message);
+            //Transport transport = session.getTransport();
+            //transport.connect(from, "pwd");
+            //transport.sendMessage(message, message.getAllRecipients());
+            //transport.close();
 //          старый способ:
 //            Transport.send(message);
 
