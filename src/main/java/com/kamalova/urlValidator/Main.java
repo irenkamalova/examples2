@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +24,7 @@ public class Main {
 
         String urlString = "https://auto.ru/sitemap_parts-114.txt.gz";
 
-        String pathToFile = "/Users/irenkamalova/Downloads/sitemaps/sitemap_dealers_1.txt";
+        String pathToFile = "/Users/irenkamalova/Downloads/sitemaps/sitemap_catalog_1.txt";
 
         Main main = new Main();
         long start = System.currentTimeMillis();
@@ -33,34 +34,28 @@ public class Main {
         System.out.println("It took: " + (end - start));
 
 
+
+
     }
 
     public void analyseFile(String pathToFile) throws IOException {
-        ExecutorService executor = Executors.newFixedThreadPool(50);
-        // 500 тредов - 40 секунд для 7000 строк
-        // 100 тредов - чуть лучше
-        // 50 - тоже самое
-        List<Future<List<Pair<String, Integer>>>> list = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(100);
+        List<Future<Pair<String, Integer>>> list = new ArrayList<>();
 
         URLValidator urlValidator = new URLValidator();
-        File inputFile = new File(pathToFile);
-        FileInputStream fileInputStream = new FileInputStream(inputFile);
+        File file = new File(pathToFile);
+        FileInputStream fileInputStream = new FileInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(fileInputStream));
-
-//        List<ValidateLinkCallable> listCallable = new ArrayList<>();
 
         int countLine = 0;
         String strLine;
-        List<String> urlsList = new ArrayList<>();
         long start = System.currentTimeMillis();
-        while ((strLine = br.readLine()) != null) {
-            urlsList.add(strLine);
+        while ((strLine = br.readLine()) != null)   {
+            Callable<Pair<String, Integer>> callable = new ValidateLinkCallable(strLine);
+            Future<Pair<String, Integer>> future = executor.submit(callable);
+            list.add(future);
             countLine++;
-            if (countLine % 40 == 0) {
-                ValidateLinkCallable callable = new ValidateLinkCallable(urlsList);
-                Future<List<Pair<String, Integer>>> future = executor.submit(callable);
-                list.add(future);
-                urlsList = new ArrayList<>();
+            if (countLine % 100 == 0) {
                 System.out.println("Checked " + countLine + " lines");
                 long end = System.currentTimeMillis();
                 System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
@@ -75,33 +70,24 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
         countLine = 0;
 
-        List<List<Pair<String, Integer>>> resultList = new ArrayList<>();
-        for (Future<List<Pair<String, Integer>>> fut : list) {
+
+        for(Future<Pair<String, Integer>> fut : list){
             try {
-                List<Pair<String, Integer>> listPairs = fut.get();
-                resultList.add(listPairs);
+                Pair<String, Integer> pair = fut.get();
                 countLine++;
-//                if (countLine % 1000 == 0) {
-                    System.out.println("Checked " + countLine * 40 + " lines");
+                if (countLine % 100 == 0) {
+                    System.out.println("Checked " + countLine + " lines");
                     long end = System.currentTimeMillis();
                     System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
-//                }
+                }
+                bw.write(pair.getKey() + " " +
+                        (pair.getValue().toString()));
+                bw.newLine();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-
-        for (List<Pair<String, Integer>> pairList : resultList) {
-            for (Pair<String, Integer> pair : pairList) {
-                if (pair.getValue() != 200)
-                bw.write(pair.getKey() + " " +
-                        (pair.getValue().toString()));
-                bw.newLine();
-            }
-        }
         bw.close();
-
-        executor.shutdown();
 
         System.out.println("End of creating result");
     }
