@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,51 +40,27 @@ public class Main {
         // 500 тредов - 40 секунд для 7000 строк
         // 100 тредов - чуть лучше
         // 50 - тоже самое
-        List<Future<Pair<String, Integer>>> list = new ArrayList<>();
+        List<Future<List<Pair<String, Integer>>>> list = new ArrayList<>();
 
         URLValidator urlValidator = new URLValidator();
         File inputFile = new File(pathToFile);
         FileInputStream fileInputStream = new FileInputStream(inputFile);
         BufferedReader br = new BufferedReader(new InputStreamReader(fileInputStream));
 
-        List<ValidateLinkCallable> listCallable = new ArrayList<>();
+//        List<ValidateLinkCallable> listCallable = new ArrayList<>();
 
         int countLine = 0;
         String strLine;
+        List<String> urlsList = new ArrayList<>();
         long start = System.currentTimeMillis();
         while ((strLine = br.readLine()) != null) {
-            while (countLine < 50) {
-                ValidateLinkCallable callable = new ValidateLinkCallable(strLine);
-                listCallable.add(callable);
-                Future<Pair<String, Integer>> future = executor.submit(callable);
-                list.add(future);
-                countLine++;
-
-            }
-
-            for (ValidateLinkCallable callable : listCallable) {
-                if ((strLine = br.readLine()) != null) {
-                    callable.changeUrl(strLine);
-                    try {
-                        callable.call();
-                        Future<Pair<String, Integer>> future = executor.submit(callable);
-                        list.add(future);
-                        countLine++;
-                        if (countLine % 100 == 0) {
-                            System.out.println("Checked " + countLine + " lines");
-                            long end = System.currentTimeMillis();
-                            System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error with call callable for link " + strLine);
-                        e.printStackTrace();
-                    }
-
-                }
-            }
-
+            urlsList.add(strLine);
             countLine++;
-            if (countLine % 100 == 0) {
+            if (countLine % 40 == 0) {
+                ValidateLinkCallable callable = new ValidateLinkCallable(urlsList);
+                Future<List<Pair<String, Integer>>> future = executor.submit(callable);
+                list.add(future);
+                urlsList = new ArrayList<>();
                 System.out.println("Checked " + countLine + " lines");
                 long end = System.currentTimeMillis();
                 System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
@@ -100,21 +75,28 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
         countLine = 0;
 
-
-        for (Future<Pair<String, Integer>> fut : list) {
+        List<List<Pair<String, Integer>>> resultList = new ArrayList<>();
+        for (Future<List<Pair<String, Integer>>> fut : list) {
             try {
-                Pair<String, Integer> pair = fut.get();
+                List<Pair<String, Integer>> listPairs = fut.get();
+                resultList.add(listPairs);
                 countLine++;
-                if (countLine % 100 == 0) {
-                    System.out.println("Checked " + countLine + " lines");
+//                if (countLine % 1000 == 0) {
+                    System.out.println("Checked " + countLine * 40 + " lines");
                     long end = System.currentTimeMillis();
                     System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
-                }
-//                bw.write(pair.getKey() + " " +
-//                        (pair.getValue().toString()));
-//                bw.newLine();
+//                }
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
+            }
+        }
+
+        for (List<Pair<String, Integer>> pairList : resultList) {
+            for (Pair<String, Integer> pair : pairList) {
+                if (pair.getValue() != 200)
+                bw.write(pair.getKey() + " " +
+                        (pair.getValue().toString()));
+                bw.newLine();
             }
         }
         bw.close();
