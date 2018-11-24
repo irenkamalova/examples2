@@ -12,10 +12,13 @@ public class URLValidator {
             HttpURLConnection huc =  (HttpURLConnection)  u.openConnection();
             huc.setRequestMethod("GET");
             huc.connect();
-            return huc.getResponseCode();
+            int code = huc.getResponseCode();
+            if (code != 200) {
+                System.out.println("LINK ERROR: " + urlString + " code is " + code);
+            }
+            return code;
         } catch (IOException e) {
             System.out.println(" Error with URL: " + urlString);
-            e.printStackTrace();
             return -1;
         }
     }

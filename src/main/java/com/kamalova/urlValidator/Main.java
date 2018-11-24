@@ -17,78 +17,103 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.zip.GZIPInputStream;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
         URLValidator urlValidator = new URLValidator();
 
-        String urlString = "https://auto.ru/sitemap_parts-114.txt.gz";
+        String pathToFile = "/Users/irenkamalova/Downloads/sitemaps/sitemap_dealers_1.txt.gz";
+        File directory = new File("/Users/irenkamalova/Downloads/sitemaps5/");
 
-        String pathToFile = "/Users/irenkamalova/Downloads/sitemaps/sitemap_catalog_1.txt";
+
+
 
         Main main = new Main();
         long start = System.currentTimeMillis();
-        main.analyseFile(pathToFile);
+//        for (File fileEntry : directory.listFiles()) {
+        File fileEntry = new File("/Users/irenkamalova/Downloads/sitemaps6/sitemap_offers_cars_1.txt.gz");
+            System.out.println(fileEntry.getName());
+            main.analyseFile(fileEntry);
+//        }
         long end = System.currentTimeMillis();
 
         System.out.println("It took: " + (end - start));
 
-
-
-
     }
 
-    public void analyseFile(String pathToFile) throws IOException {
-        ExecutorService executor = Executors.newFixedThreadPool(100);
-        List<Future<Pair<String, Integer>>> list = new ArrayList<>();
+    public void analyseFile(File file) throws IOException, InterruptedException {
+//        ExecutorService executor = Executors.newFixedThreadPool(50);
 
-        URLValidator urlValidator = new URLValidator();
-        File file = new File(pathToFile);
+//        URLValidator urlValidator = new URLValidator();
         FileInputStream fileInputStream = new FileInputStream(file);
-        BufferedReader br = new BufferedReader(new InputStreamReader(fileInputStream));
+        GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(gzipInputStream));
 
         int countLine = 0;
         String strLine;
         long start = System.currentTimeMillis();
-        while ((strLine = br.readLine()) != null)   {
-            Callable<Pair<String, Integer>> callable = new ValidateLinkCallable(strLine);
-            Future<Pair<String, Integer>> future = executor.submit(callable);
-            list.add(future);
-            countLine++;
-            if (countLine % 100 == 0) {
-                System.out.println("Checked " + countLine + " lines");
-                long end = System.currentTimeMillis();
-                System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
+        while ((strLine = br.readLine()) != null) {
+            if (countLine % 1000 == 0) {
+                countLine += doCycle(strLine, br);
+                System.out.println("Returned countline is: " + countLine);
+                Thread.sleep(1000);
+
             }
         }
         br.close();
         System.out.println("End of scanning file");
 
-        File resultFile = new File(pathToFile + ".output.txt");
+        File resultFile = new File(file.getName() + ".output.txt");
         resultFile.deleteOnExit();
-        FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
-        countLine = 0;
+//        executor.shutdown();shutdown
+        System.out.println("End of creating result");
+    }
 
+    private int doCycle(String strLine, BufferedReader br) throws IOException {
+        ExecutorService executor = Executors.newFixedThreadPool(50);
 
-        for(Future<Pair<String, Integer>> fut : list){
-            try {
-                Pair<String, Integer> pair = fut.get();
-                countLine++;
-                if (countLine % 100 == 0) {
-                    System.out.println("Checked " + countLine + " lines");
-                    long end = System.currentTimeMillis();
-                    System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
+        List<Future<Pair<String, Integer>>> list = new ArrayList<>();
+
+        // to validate the first link:
+        Callable<Pair<String, Integer>> callable0 = new ValidateLinkCallable(strLine);
+        Future<Pair<String, Integer>> future0 = executor.submit(callable0);
+        list.add(future0);
+        int countLine = 0;
+        long start = System.currentTimeMillis();
+        while ((strLine = br.readLine()) != null && countLine < 1000) {
+            Callable<Pair<String, Integer>> callable = new ValidateLinkCallable(strLine);
+            Future<Pair<String, Integer>> future = executor.submit(callable);
+            list.add(future);
+            countLine++;
+            if (countLine % 100 == 0) {
+                System.out.println("Spended to check " + countLine + " lines");
+                long end = System.currentTimeMillis();
+                System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
+            }
+
+            if (countLine % 1000 == 0) {
+                int checkedLine = 0;
+                for (Future<Pair<String, Integer>> fut : list) {
+                    try {
+                        Pair<String, Integer> pair = fut.get();
+                        if (pair.getValue() != 200) {
+                            System.out.println("Error with link, code is " + pair.getValue());
+                        }
+                        checkedLine++;
+                        if (checkedLine % 100 == 0) {
+                            System.out.println("Checked " + checkedLine + " lines");
+                            long end = System.currentTimeMillis();
+                            System.out.println("Spent " + (end - start) / 1000 + " seconds" + (end - start) % 1000 + " milliseconds");
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
                 }
-                bw.write(pair.getKey() + " " +
-                        (pair.getValue().toString()));
-                bw.newLine();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
             }
         }
-        bw.close();
-
-        System.out.println("End of creating result");
+        executor.shutdown();
+        return countLine;
     }
 }
